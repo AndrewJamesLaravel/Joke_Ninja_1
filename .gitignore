@@ -1,2 +1,11 @@
 /vendor
 /.vagrant
+.idea
+/bin
+/scripts
+/src
+.gitattributes
+.gitignore
+LICENSE.txt
+after.sh
+aliases

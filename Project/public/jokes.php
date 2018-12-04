@@ -1,17 +1,26 @@
 <?php
 
-
-$dbInfo = 'mysql:host=localhost;dbname=joker;charset=utf8';
-$dbUser = 'JokerDB_user';
-$dbPassword = 'JokerDB_pass';
 try {
-    $pdo = new PDO($dbInfo, $dbUser, $dbPassword);
-    $pdo->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+    include __DIR__ . '/../includes/DatabaseConnection.php';
+    include __DIR__ . '/../includes/DatabaseFunctions.php';
 
-    $sql = 'SELECT `joketext`, `id` FROM `joke`';
-    $jokes = $pdo->query($sql);
+    $result = findAll( $pdo, 'joke' );
+
+    $jokes = [];
+    foreach ($result as $joke) {
+        $author = findById($pdo, 'author', 'id', $joke['authorId']);
+        $jokes[] = [
+          'id' => $joke['id'],
+          'joketext' => $joke['joketext'],
+          'jokedate' => $joke['jokedate'],
+          'name' => $author['name'],
+          'email' => $author['email']
+        ];
+    }
 
     $title = 'Joke list';
+
+    $totalJokes = total( $pdo, 'joke' );
 
     ob_start();
 
