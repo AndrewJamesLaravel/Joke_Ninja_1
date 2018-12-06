@@ -1,4 +1,4 @@
-<p><?=$variables['totalJokes']?> jokes have been submitted to the The Internet Joke Database</p>
+<p><?=$totalJokes?> jokes have been submitted to the The Internet Joke Database</p>
 
 <?php foreach ($jokes as $joke): ?>
 <blockquote>
@@ -14,9 +14,9 @@
             echo $date->format('jS F Y');
         ?>)
 
-        <a href="index.php?action=edit&amp;id=<?=$joke['id']?>">Edit</a>
+        <a href="/joke/edit?id=<?=$joke['id']?>">Edit</a>
 
-        <form action="index.php?action=delete" method="post">
+        <form action="/joke/delete" method="post">
             <input type="hidden" name="id" value="<?=$joke['id']?>">
             <input type="submit" value="Delete">
         </form>
