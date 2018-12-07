@@ -1,6 +1,9 @@
 <?php
 
-class JokeController {
+namespace Jokerdb\Controllers;
+use \Ninja\DatabaseTable;
+
+class Joke {
     private $authorsTable;
     private $jokesTable;
 
@@ -51,7 +54,7 @@ class JokeController {
 
             $joke = $_POST['joke'];
             $joke['authorId'] = 1;
-            $joke['jokedate'] = new DateTime();
+            $joke['jokedate'] = new \DateTime();
             $this->jokesTable->save($joke);
 
             header('location: /joke/list');
