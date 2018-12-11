@@ -21,7 +21,7 @@ class JokerdbRoutes implements \Ninja\Routes
 
     public function getRoutes(): array
     {
-        $jokeController = new \Jokerdb\Controllers\Joke($this->jokesTable, $this->authorsTable);
+        $jokeController = new \Jokerdb\Controllers\Joke($this->jokesTable, $this->authorsTable, $this->authentication);
         $authorController = new \Jokerdb\Controllers\Register($this->authorsTable);
         $loginController = new \Jokerdb\Controllers\Login($this->authentication);
 
