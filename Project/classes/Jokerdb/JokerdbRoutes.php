@@ -5,16 +5,43 @@ namespace Jokerdb;
 class JokerdbRoutes implements \Ninja\Routes
 {
 
-    public function getRoutes()
+    private $authorsTable;
+    private $jokesTable;
+    private $authentication;
+
+    public function __construct()
     {
         include __DIR__ . '/../../includes/DatabaseConnection.php';
 
-        $jokesTable = new \Ninja\DatabaseTable($pdo, 'joke', 'id');
-        $authorsTable = new \Ninja\DatabaseTable($pdo, 'author', 'id');
+        $this->jokesTable = new \Ninja\DatabaseTable($pdo, 'joke', 'id');
+        $this->authorsTable = new \Ninja\DatabaseTable($pdo, 'author', 'id');
+        $this->authentication = new \Ninja\Authentication($this->authorsTable,
+            'email', 'password');
+    }
 
-        $jokeController = new \Jokerdb\Controllers\Joke($jokesTable, $authorsTable);
+    public function getRoutes(): array
+    {
+        $jokeController = new \Jokerdb\Controllers\Joke($this->jokesTable, $this->authorsTable);
+        $authorController = new \Jokerdb\Controllers\Register($this->authorsTable);
+        $loginController = new \Jokerdb\Controllers\Login($this->authentication);
 
         $routes = [
+            'author/register' => [
+              'GET' => [
+                  'controller' => $authorController,
+                  'action' => 'registrationForm'
+              ],
+                'POST' => [
+                    'controller' => $authorController,
+                    'action' => 'registerUser'
+                ]
+            ],
+            'author/success' => [
+              'GET' => [
+                  'controller' => $authorController,
+                  'action' => 'success'
+              ]
+            ],
             'joke/edit' => [
                 'POST' => [
                     'controller' => $jokeController,
@@ -23,13 +50,15 @@ class JokerdbRoutes implements \Ninja\Routes
                 'GET' => [
                     'controller' => $jokeController,
                     'action' => 'edit'
-                ]
+                ],
+                'login' => true
             ],
             'joke/delete' => [
                 'POST' => [
                     'controller' => $jokeController,
                     'action' => 'delete'
-                ]
+                ],
+                'login' => true
             ],
             'joke/list' => [
                 'GET' => [
@@ -42,27 +71,43 @@ class JokerdbRoutes implements \Ninja\Routes
                     'controller' => $jokeController,
                     'action' => 'home'
                 ]
+            ],
+            'login/error' => [
+                'GET' => [
+                    'controller' => $loginController,
+                    'action' => 'error'
+                ]
+            ],
+            'login' => [
+                'GET' => [
+                    'controller' => $loginController,
+                    'action' => 'loginForm'
+                ],
+                'POST' => [
+                    'controller' => $loginController,
+                    'action' => 'processLogin'
+                ]
+            ],
+            'login/success' => [
+                'GET' => [
+                    'controller' => $loginController,
+                    'action' => 'success'
+                ],
+                'login' => true
+            ],
+            'logout' => [
+                'GET' => [
+                    'controller' => $loginController,
+                    'action' => 'logout'
+                ]
             ]
         ];
 
         return $routes;
+    }
 
-        /*if ($route === 'joke/list') {
-            $controller = new \Jokerdb\Controllers\Joke($jokesTable, $authorsTable);
-            $page = $controller->list();
-        } elseif ($route === '') {
-            $controller = new \Jokerdb\Controllers\Joke($jokesTable, $authorsTable);
-            $page = $controller->home();
-        } elseif ($route === 'joke/edit') {
-            $controller = new \Jokerdb\Controllers\Joke($jokesTable, $authorsTable);
-            $page = $controller->edit();
-        } elseif ($route === 'joke/delete') {
-            $controller = new \Jokerdb\Controllers\Joke($jokesTable, $authorsTable);
-            $page = $controller->delete();
-        } elseif ($route === 'register') {
-            $controller = new \Jokerdb\Controllers\Register($authorsTable);
-            $page = $controller->showForm();
-        }
-        return $page;*/
+    public function getAuthentication(): \Ninja\Authentication
+    {
+        return $this->authentication;
     }
 }
