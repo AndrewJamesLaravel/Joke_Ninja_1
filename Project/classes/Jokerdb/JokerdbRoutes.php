@@ -13,8 +13,10 @@ class JokerdbRoutes implements \Ninja\Routes
     {
         include __DIR__ . '/../../includes/DatabaseConnection.php';
 
-        $this->jokesTable = new \Ninja\DatabaseTable($pdo, 'joke', 'id');
-        $this->authorsTable = new \Ninja\DatabaseTable($pdo, 'author', 'id');
+        $this->jokesTable = new \Ninja\DatabaseTable($pdo, 'joke', 'id',
+            '\Jokerdb\Entity\Joke', [&$this->authorsTable]);
+        $this->authorsTable = new \Ninja\DatabaseTable($pdo, 'author', 'id',
+            '\Jokerdb\Entity\Author', [&$this->jokesTable]);
         $this->authentication = new \Ninja\Authentication($this->authorsTable,
             'email', 'password');
     }
