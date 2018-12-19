@@ -9,7 +9,7 @@ folders:
       to: /home/vagrant/Code
 
 sites:
-    - map: homestead.app
+    - map: ninja.test
       to: /home/vagrant/Code/Project/public
 
 databases:
