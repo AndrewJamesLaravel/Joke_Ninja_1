@@ -11,11 +11,6 @@ class Login
         $this->authentication = $authentication;
     }
 
-    public function error()
-    {
-        return ['template' => 'loginerror.html.php', 'title' => 'You are not logged in'];
-    }
-
     public function loginForm()
     {
         return ['template' => 'login.html.php', 'title' => 'Log In'];
@@ -44,5 +39,15 @@ class Login
         unset($_SESSION);
         session_destroy();
         return['template' => 'logout.html.php', 'title' => 'You have been logged out'];
+    }
+
+    public function error()
+    {
+        return ['template' => 'loginerror.html.php', 'title' => 'You are not logged in'];
+    }
+
+    public function permissionserror()
+    {
+        return ['template' => 'permissionserror.html.php', 'title' => 'Access Denied'];
     }
 }

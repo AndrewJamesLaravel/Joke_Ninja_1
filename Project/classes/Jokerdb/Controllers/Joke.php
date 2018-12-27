@@ -21,27 +21,33 @@ class Joke {
     }
     public function list()
     {
+        $page = $_GET['page'] ?? 1;
+        $offSet = ($page - 1) * 10;
+
         if (isset($_GET['category'])) {
             $category = $this->categoriesTable->findById($_GET['category']);
-            $jokes = $category->getJokes();
+            $jokes = $category->getJokes(10, $offSet);
+            $totalJokes = $category->getNumJokes();
         } else {
-            $jokes = $this->jokesTable->findAll();
+            $jokes = $this->jokesTable->findAll('jokedate DESC', 10, $offSet);
+            $totalJokes = $this->jokesTable->total();
         }
 
     $title = 'Joke list';
 
-    $totalJokes = $this->jokesTable->total();
-
     $author = $this->authentication->getUser();
 
-    return ['template' => 'jokes.html.php', 'title' => $title,
-        'variables' => [
-            'totalJokes' => $totalJokes,
-            'jokes' => $jokes,
-            'userId' => $author->id ?? null,
-            'categories' => $this->categoriesTable->findAll()
-        ]
-    ];
+    return ['template' => 'jokes.html.php',
+            'title' => $title,
+            'variables' => [
+                'totalJokes' => $totalJokes,
+                'jokes' => $jokes,
+                'user' => $author,
+                'categories' => $this->categoriesTable->findAll(),
+                'currentPage' => $page,
+                'category' => $_GET['category'] ?? null
+                ]
+            ];
     }
 
     public function home() {
@@ -53,7 +59,7 @@ class Joke {
         $author = $this->authentication->getUser();
         $joke = $this->jokesTable->findById($_POST['id']);
 
-        if ($joke->authorId != $author->id) {
+        if ($joke->authorId != $author->id && !$author->hasPermission(\Jokerdb\Entity\Author::DELETE_JOKES)) {
             return;
         }
 
@@ -69,6 +75,7 @@ class Joke {
         $joke['jokedate'] = new \DateTime();
 
         $jokeEntity = $author->addJoke($joke);
+        $jokeEntity->clearCategories(); //  remove every record from the joke_category table that represents the joke stored in $joke
 
         foreach ($_POST['category'] as $categoryId) {
             $jokeEntity->addCategory($categoryId);
@@ -91,7 +98,7 @@ class Joke {
                     'title'     => $title,
                     'variables' => [
                         'joke'       => $joke ?? null,
-                        'userId'     => $author->id ?? null,
+                        'user' => $author,
                         'categories' => $categories
                 ]];
     }

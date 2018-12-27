@@ -27,10 +27,16 @@ class DatabaseTable
         return $query;
     }
 
-    public function total()
+    public function total($field = null, $value = null)
     {
         $sql = 'SELECT COUNT(*) FROM `' . $this->table . '`';
-        $query = $this->query($sql);
+        $parameters = [];
+
+        if (!empty($field)) {
+            $sql .= ' WHERE `' . $field . '` = :value';
+            $parameters = ['value' => $value];
+        }
+        $query = $this->query($sql, $parameters);
         $row = $query->fetch();
 
         return $row[0];
@@ -45,13 +51,25 @@ class DatabaseTable
         return $query->fetchObject($this->className, $this->constructorArgs);
     }
 
-    public function find($column, $value)
+    public function find($column, $value, $orderBy = null, $limit = null, $offSet = null)
     {
         $query = 'SELECT * FROM ' . $this->table . ' WHERE ' . $column . ' = :value';
 
         $parameters = [
             'value' => $value
         ];
+
+        if ($orderBy != null) {
+            $query .= ' ORDER BY ' . $orderBy;
+        }
+
+        if ($limit != null) {
+            $query .= ' LIMIT ' . $limit;
+        }
+
+        if ($offSet != null) {
+            $query .= ' OFFSET ' . $offSet;
+        }
 
         $query = $this->query($query, $parameters);
 
@@ -103,9 +121,22 @@ class DatabaseTable
         $this->query($sql, $parameters);
     }
 
-    public function findAll()
+    public function findAll($orderBy = null, $limit = null, $offSet = null)
     {
         $sql = 'SELECT * FROM `' . $this->table . '`';
+
+        if ($orderBy != null) {
+            $sql .= ' ORDER BY ' . $orderBy;
+        }
+
+        if ($limit != null) {
+            $sql .= ' LIMIT ' . $limit;
+        }
+
+        if ($offSet != null) {
+            $sql .= ' OFFSET ' . $offSet;
+        }
+
         $result = $this->query($sql);
         return $result->fetchAll(\PDO::FETCH_CLASS, $this->className, $this->constructorArgs);
     }
@@ -142,5 +173,14 @@ class DatabaseTable
             }
         }
         return $entity;
+    }
+
+    public function deleteWhere($column, $value)
+    {
+        $sql = 'DELETE FROM ' . $this->table . ' WHERE ' . $column . ' = :value';
+        $parameters = [
+            'value' => $value
+        ];
+        $query = $this->query($sql, $parameters);
     }
 }
